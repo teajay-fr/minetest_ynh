@@ -35,8 +35,7 @@ fi
 #=================================================
 
 # Ferme les ports dans le firewall
-ALL_QUIET yunohost firewall disallow UDP $port
-ALL_QUIET yunohost firewall disallow TCP $port
+ALL_QUIET yunohost firewall disallow Both $port
 
 #=================================================
 # SPECIFIC REMOVE

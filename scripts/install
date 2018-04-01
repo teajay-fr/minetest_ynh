@@ -42,8 +42,7 @@ test -z "$codename" && (ynh_die "codename empty")
 port=$(ynh_find_port 30000)	# Cherche un port libre.
 
 # Open ports in firewall
-ALL_QUIET yunohost firewall allow UDP $port
-ALL_QUIET yunohost firewall allow TCP $port
+ALL_QUIET yunohost firewall allow Both $port
 ynh_app_setting_set $app port $port
 
 # Store informations in Yunohost config
@@ -66,25 +65,19 @@ cp -a "../conf/minetest-preferences" "/etc/apt/preferences.d/00MinetestPinning"
 ynh_replace_string "__CODENAME__" "$codename" "/etc/apt/preferences.d/00MinetestPinning"
 if [ $(uname -m) == "armv7l" ]
 then
-    gpg --list-keys 7638D0442B90D010 > /dev/null 2>&1
-    if [ $? != 0 ]
-    then
-        gpg --keyserver pgpkeys.mit.edu --recv-key 7638D0442B90D010
-    fi
-    gpg --list-keys 8B48AD6246925553 > /dev/null 2>&1
-    if [ $? != 0 ]
-    then
-        gpg --keyserver pgpkeys.mit.edu --recv-key 8B48AD6246925553
-    fi
-    if [ $(apt-key finger | grep "7638 D044 2B90 D010" -c) == 0 ]
-    then
-        gpg -a --export 7638D0442B90D010 | apt-key add -
-    fi
-    if [ $(apt-key finger | grep "8B48 AD62 4692 5553" -c) == 0 ]
-    then
-        gpg -a --export 8B48AD6246925553 | apt-key add -
-    fi
+    case "$codename" in
+	wheezy)
+	    add_repo_key 8B48AD6246925553 "7638 D044 2B90 D010"
+	    ;;
+	jessie)
+	    add_repo_key 7638D0442B90D010 "7638 D044 2B90 D010"
+	    ;;
+	stretch)
+	    add_repo_key E0B11894F66AEC98 "E0B1 1894 F66A EC98"
+	    ;;
+   esac
 fi
+
 ynh_package_update
 ynh_install_app_dependencies minetest-server sqlite3
 
@@ -99,9 +92,8 @@ yunohost service add minetest --log "/var/log/minetest/minetest.log"
 # CONFIGURE MINETEST
 #=================================================
 
+
 cp "../conf/minetest.conf" "/etc/minetest/minetest.conf"
-chown root:root /etc/minetest/minetest.conf
-chmod 644 /etc/minetest/minetest.conf
 
 # Change Minetest configuration
 ynh_replace_string "__PORT__" "$port" /etc/minetest/minetest.conf

@@ -6,6 +6,14 @@
 #=================================================
 #=================================================
 
+add_repo_key () {
+    (gpg --list-keys $1 > /dev/null 2>&1 || gpg --keyserver pgpkeys.mit.edu --recv-key $1)
+    if [ $(apt-key finger | grep "$2" -c) == 0 ]
+    then
+        gpg -a --export $1 | apt-key add -
+    fi
+}
+
 ynh_fpm_config () {
 	finalphpconf="/etc/php5/fpm/pool.d/$app.conf"
 	ynh_backup_if_checksum_is_different "$finalphpconf" 1
