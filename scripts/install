@@ -86,7 +86,7 @@ ynh_install_app_dependencies minetest-server sqlite3
 #=================================================
 
 # Add service to Yunohost's monitoring
-yunohost service add minetest --log "/var/log/minetest/minetest.log"
+yunohost service add minetest-server --log "/var/log/minetest/minetest.log"
 
 #=================================================
 # CONFIGURE MINETEST
